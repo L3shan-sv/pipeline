@@ -1,16 +1,22 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11-slim'  // Python + pip included
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // give access to host Docker
-        }
-    }
+    agent any   // Use the default Jenkins agent
 
     environment {
         IMAGE_NAME = "myapp"
     }
 
     stages {
+
+        stage('Install Dependencies') {
+            steps {
+                // Install Python, pip, AWS CLI, kubectl, Docker
+                sh '''
+                apt update -y
+                apt install -y python3 python3-pip awscli kubectl docker.io
+                pip install --upgrade pip
+                '''
+            }
+        }
 
         stage('Checkout') {
             steps {
@@ -20,7 +26,6 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
                 sh 'pytest'
             }
