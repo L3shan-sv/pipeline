@@ -9,11 +9,21 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Install Python, pip, AWS CLI, kubectl, Docker
                 sh '''
+                # Update package list
                 apt update -y
-                apt install -y python3 python3-pip awscli kubectl docker.io
+                
+                # Install Python, pip, awscli, Docker, curl, gnupg
+                apt install -y python3 python3-pip awscli docker.io curl apt-transport-https gnupg
+                
+                # Upgrade pip
                 pip install --upgrade pip
+                
+                # Install kubectl correctly
+                curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+                echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+                apt update -y
+                apt install -y kubectl
                 '''
             }
         }
